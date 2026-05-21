@@ -31,21 +31,20 @@ const SOURCE_SKILLS_DIR = path.resolve(__dirname, '../skills');
 // --- Helper Functions ---
 function printBanner() {
   console.log(`
-${BRAND_COLOR}    _    ___   ____ _   _ _____ _   _ _____ 
-   / \\  |_ _| / ___| \\ | |_   _| | | |__  / 
-  / _ \\  | | | |  _|  \\| | | | | | | |  / /  
- / ___ \\ | | | |_| | |\\  | | | | |_| | / /_  
-/_/   \\_\\___| \\____|_| \\_| |_|  \\___/ /____|
+${BRAND_COLOR}   _    ___     _     ___  ___  _  _  _____   _     ___   _    ___
+  /_\\  |_ _|   /_\\   / __|| __|| \\| ||_   _| | |   | __| /_\\  |   \\
+ / _ \\  | |   / _ \\ | (_ || _| | .\` |  | |   | |__ | _| / _ \\ | |) |
+/_/ \\_\\|___| /_/ \\_\\ \\___||___||_|\\_|  |_|   |____||___/_/ \\_\\|___/
 ${RESET}
-${BOLD}${WHITE}          S K I L L S   I N S T A L L E R${RESET}
-${GRAY}---------------------------------------------${RESET}
+${BOLD}${WHITE}              S K I L L S   I N S T A L L E R${RESET}
+${GRAY}-------------------------------------------------------------${RESET}
 `);
 }
 
 function printHelp() {
   printBanner();
   console.log(`${BOLD}Usage:${RESET}`);
-  console.log(`  npx @ai-agent-lead/skills [options]`);
+  console.log(`  npx github:ai-agent-lead/skills [options]`);
   console.log(``);
   console.log(`${BOLD}Options:${RESET}`);
   console.log(`  ${CYAN}--global, -g${RESET}       Install to global directories (e.g. ~/.claude/skills)`);
@@ -59,8 +58,8 @@ function printHelp() {
   console.log(`  ${CYAN}--help, -h${RESET}          Show this help menu`);
   console.log(``);
   console.log(`${BOLD}Examples:${RESET}`);
-  console.log(`  npx @ai-agent-lead/skills --global`);
-  console.log(`  npx @ai-agent-lead/skills --local --claude`);
+  console.log(`  npx github:ai-agent-lead/skills --global`);
+  console.log(`  npx github:ai-agent-lead/skills --local --claude`);
   console.log(``);
 }
 
@@ -75,8 +74,8 @@ function askQuestion(query) {
   }));
 }
 
-function copyFolderSync(from, to) {
-  if (!fs.existsSync(from)) return;
+function copyFolderSync(from, to, { force = false } = {}, stats = { copied: 0, skipped: 0 }) {
+  if (!fs.existsSync(from)) return stats;
   fs.mkdirSync(to, { recursive: true });
   const elements = fs.readdirSync(from);
   for (const element of elements) {
@@ -84,11 +83,17 @@ function copyFolderSync(from, to) {
     const toPath = path.join(to, element);
     const stat = fs.lstatSync(fromPath);
     if (stat.isDirectory()) {
-      copyFolderSync(fromPath, toPath);
+      copyFolderSync(fromPath, toPath, { force }, stats);
     } else if (stat.isFile()) {
+      if (!force && fs.existsSync(toPath)) {
+        stats.skipped++;
+        continue;
+      }
       fs.copyFileSync(fromPath, toPath);
+      stats.copied++;
     }
   }
+  return stats;
 }
 
 // --- Main Execution ---
@@ -112,7 +117,7 @@ async function run() {
     else if (arg === '--local' || arg === '-l') flags.local = true;
     else if (arg === '--claude') flags.claude = true;
     else if (arg === '--codex') flags.codex = true;
-    else if (arg === '--antigravity' || arg === '--agy') flags.antigravity = true;
+    else if (arg === '--antigravity' || arg === '--agy' || arg === '-agy') flags.antigravity = true;
     else if (arg === '--opencode') flags.opencode = true;
     else if (arg === '--all') flags.all = true;
     else if (arg === '--force' || arg === '-f') flags.force = true;
@@ -240,7 +245,7 @@ async function run() {
   }
 
   console.log(`${BOLD}Starting installation to destinations...${RESET}`);
-  console.log(`${GRAY}---------------------------------------------${RESET}`);
+  console.log(`${GRAY}-------------------------------------------------------------${RESET}`);
 
   let successCount = 0;
   for (const dest of destinations) {
@@ -248,12 +253,15 @@ async function run() {
     try {
       // Resolve absolute paths nicely for output display
       const displayPath = dest.path.replace(home, '~');
-      console.log(`  ${GRAY}Path: ${displayPath}${RESET}`);
+      console.log("  " + GRAY + "Path: " + displayPath + RESET);
       
       // Perform directory copy
-      copyFolderSync(SOURCE_SKILLS_DIR, dest.path);
+      const result = copyFolderSync(SOURCE_SKILLS_DIR, dest.path, { force: flags.force });
       
-      console.log(`  ${SUCCESS_COLOR}✔ Successfully installed to ${dest.name}!${RESET}`);
+      const summary = result.skipped > 0
+        ? ` (${result.copied} copied, ${result.skipped} skipped — use --force to overwrite)`
+        : ` (${result.copied} files)`;
+      console.log(`  ${SUCCESS_COLOR}✔ Successfully installed to ${dest.name}!${RESET}${GRAY}${summary}${RESET}`);
       successCount++;
     } catch (err) {
       console.error(`  ${RED}✗ Failed to install to ${dest.name}: ${err.message}${RESET}`);
@@ -261,7 +269,7 @@ async function run() {
     console.log(``);
   }
 
-  console.log(`${GRAY}---------------------------------------------${RESET}`);
+  console.log(`${GRAY}-------------------------------------------------------------${RESET}`);
   if (successCount === destinations.length) {
     console.log(`${SUCCESS_COLOR}🎉 Installation complete! All (${successCount}/${destinations.length}) targets successfully updated.${RESET}`);
   } else if (successCount > 0) {
