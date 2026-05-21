@@ -13,3 +13,26 @@ The goal: turn engineering discipline from something I have to enforce into some
 ## Where things live
 
 - [`skills/`](./skills/) — the skill set. See [`skills/README.md`](./skills/README.md) for the index, the role/trigger taxonomy, and how skills compose into workflows.
+
+## Installation
+
+You can install all the skills in this repository directly using `npx`:
+
+```bash
+npx github:ai-agent-lead/skills
+```
+
+### Options and Customization
+
+By default, the installer runs in an interactive console wizard allowing you to select your targets. You can also specify flags to customize the installation target and scope:
+
+- `--global`, `-g`       Install to personal/user-level global directories (e.g. `~/.claude/skills`)
+- `--local`, `-l`        Install to current project/workspace directories (e.g. `./.claude/skills`)
+- `--claude`            Install skills only for Claude Code
+- `--codex`             Install skills only for Codex
+- `--antigravity`, `-agy` Install skills only for Antigravity
+- `--opencode`          Install skills only for OpenCode
+- `--all`               Install skills for all supported assistants (default)
+- `--force`, `-f`         Overwrite files without confirmation
+- `--help`, `-h`          Show the help menu with all options
+

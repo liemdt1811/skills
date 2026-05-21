@@ -1,0 +1,27 @@
+{
+  "name": "@ai-agent-lead/skills",
+  "version": "1.0.0",
+  "description": "Install AI agent skills for Claude Code, Codex, Antigravity, and OpenCode",
+  "main": "bin/install.js",
+  "bin": {
+    "install-skills": "./bin/install.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ai-agent-lead/skills.git"
+  },
+  "keywords": [
+    "claude",
+    "codex",
+    "antigravity",
+    "opencode",
+    "skills",
+    "ai-agent"
+  ],
+  "author": "Google DeepMind",
+  "license": "Apache-2.0"
+}
