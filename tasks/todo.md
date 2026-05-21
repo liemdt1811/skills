@@ -5,3 +5,6 @@
 - [x] Verify script with `--help` option and various argument permutations <!-- id: 2 -->
 - [x] Verify copy output by doing a local test run <!-- id: 3 -->
 - [x] Update README with installation instructions using NPX <!-- id: 4 -->
+- [x] Add OpenCode support to `package.json` and `bin/install.js` <!-- id: 5 -->
+- [x] Verify OpenCode copy output by doing a local test run <!-- id: 6 -->
+- [x] Update README and tasks/todo.md with OpenCode instructions <!-- id: 7 -->
